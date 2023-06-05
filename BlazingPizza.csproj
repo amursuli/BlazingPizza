@@ -15,10 +15,12 @@
     <None Remove="Data\" />
     <None Remove="Controllers\" />
     <None Remove="Services\" />
+    <None Remove="Components\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
     <Folder Include="Controllers\" />
     <Folder Include="Services\" />
+    <Folder Include="Components\" />
   </ItemGroup>
 </Project>

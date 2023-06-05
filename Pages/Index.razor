@@ -23,9 +23,7 @@
 
 @if (OrderState.ShowingConfigureDialog)
 {
-    <ConfigurePizzaDialog Pizza="OrderState.ConfiguringPizza"
-                          OnCancel="OrderState.CancelConfigurePizzaDialog"
-                          OnConfirm="OrderState.ConfirmConfigurePizzaDialog" />
+    <ConfigurePizzaDialog Pizza="OrderState.ConfiguringPizza" OnCancel="OrderState.CancelConfigurePizzaDialog" OnConfirm="OrderState.ConfirmConfigurePizzaDialog" />
 }
 
 <div class="sidebar">
@@ -41,7 +39,10 @@
                     <div class="item-price">
                         @configuredPizza.GetFormattedTotalPrice()
                     </div>
-                    <a @onclick="@(() => OrderState.RemoveConfiguredPizza(configuredPizza))" class="delete-item">x</a>
+                    <button type="button" class="close text-danger" aria-label="Close"
+                            @onclick="@(async () => await RemovePizzaConfirmation(configuredPizza))">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             }
         </div>
@@ -66,6 +67,7 @@
 
     @using BlazingPizza.Services
     @inject OrderState OrderState
+    @inject IJSRuntime JavaScript
 
     List<PizzaSpecial> specials = new();
     Order order => OrderState.Order;
@@ -88,5 +90,26 @@
         };
 
         showingConfigureDialog = true;
+    }
+
+    async Task RemovePizzaConfirmation(Pizza removePizza)
+    {
+        var messageParams = new
+        {
+            title = "Remove Pizza?",
+            text = $"Do you want to remove the {removePizza.Special!.Name} from your order?",
+            icon = "warning",
+            buttons = new
+            {
+                abort = new { text = "No, leave it in my order", value = false },
+                confirm = new { text = "Yes, remove pizza", value = true }
+            },
+            dangerMode = true
+        };
+
+        if (await JavaScript.InvokeAsync<bool>("swal", messageParams))
+        {
+            OrderState.RemoveConfiguredPizza(removePizza);
+        }
     }
 }
